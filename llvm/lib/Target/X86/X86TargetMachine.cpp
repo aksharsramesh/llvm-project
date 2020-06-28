@@ -407,6 +407,9 @@ void X86PassConfig::addIRPasses() {
   // feature enabled.
   addPass(createIndirectBrExpandPass());
 
+  // EDDI-V Pass. \see llvm/lib/Target/X86/Eddiv.cpp
+  addPass(createEddivPass());
+
   // Add Control Flow Guard checks.
   const Triple &TT = TM->getTargetTriple();
   if (TT.isOSWindows()) {
