@@ -40,6 +40,7 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/Debug.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 using namespace llvm;
@@ -147,12 +148,12 @@ void Eddiv::handleDuplicateInstruction(Instruction *Inst, Instruction *newInst,
   for(Use &use : Inst->uses()){
     Instruction *User = dyn_cast<Instruction>(use.getUser());
     if(dyn_cast<StoreInst>(User)){
-      DEBUG(errs()<<"\n Found the store use : "<<*User);
+      LLVM_DEBUG(errs()<<"\n Found the store use : "<<*User);
       Instruction *I = dyn_cast<Instruction>(User->getOperand(1));
       assert(I);
       AllocaInst *AI = dyn_cast<AllocaInst>(I);
       if(AI){
-        DEBUG(errs()<<"\n Alloca found "<<*I);
+        LLVM_DEBUG(errs()<<"\n Alloca found "<<*I);
         AI = duplicateAllocaAndInsert(AI);
         assert(AI && "New Alloca can not be null");
         assert(GV && "GlobalVariable can not be null");
@@ -184,7 +185,7 @@ void Eddiv::duplicateInst(AllocaInst &AI, int count, Function &F) {
   for (Use &use : AI.uses()) {
     c++;
     Instruction *User = cast<Instruction>(use.getUser());
-    DEBUG(dbgs() << "\nUses of alloca found");
+    LLVM_DEBUG(dbgs() << "\nUses of alloca found");
     if (User->getOpcode() == Instruction::Load)
       loads.push_back(User);
   }
@@ -277,7 +278,7 @@ bool Eddiv::runOnFunction(Function &F) {
     return false;      
   }
 
-  DEBUG(dbgs() << "****************Eddiv Pass**************");
+  LLVM_DEBUG(dbgs() << "****************Eddiv Pass**************");
   SmallVector<AllocaInst *, 5> allocas;
 
   TheModule = F.getParent();
@@ -294,11 +295,11 @@ bool Eddiv::runOnFunction(Function &F) {
 
       auto *AI = dyn_cast<AllocaInst>(&Inst);
       if (!AI) {
-        DEBUG(dbgs() << "\nThis is not a alloca instruction");
+        LLVM_DEBUG(dbgs() << "\nThis is not a alloca instruction");
         break;
       }
       // If not alloca
-      DEBUG(dbgs() << "\n this is a alloca instruction" << *AI);
+      LLVM_DEBUG(dbgs() << "\n this is a alloca instruction" << *AI);
       // duplicateInst(*AI,1);
 
       //Selecting allocas with metadata

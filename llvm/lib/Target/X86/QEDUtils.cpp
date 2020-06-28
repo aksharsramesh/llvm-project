@@ -17,6 +17,7 @@
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Attributes.h"
+#include "llvm/Support/Debug.h"
 #include <algorithm>
 #include <vector>
 
@@ -61,7 +62,7 @@ void QEDU::addDebugLoc(Instruction *I) {
   Function *TheFunction = I->getFunction();
   DebugLoc DL = DebugLoc::get(99, 99, TheFunction->getSubprogram());
   I->setDebugLoc(DL);
-  DEBUG(errs() << "\n Adding debug location to the instruction " << *I
+  LLVM_DEBUG(errs() << "\n Adding debug location to the instruction " << *I
                << "\n DL is " << DL);
 }
 
@@ -112,18 +113,18 @@ bool QEDU::isQEDLibCall(MachineFunction *MF) {
 /// user specifies -verify option in command line.
 void QEDU::verify(std::vector<Instruction *> QEDInsts, Function &F) {
 
-  DEBUG(errs() << "\n Verification for " << F.getName());
+  LLVM_DEBUG(errs() << "\n Verification for " << F.getName());
   for (BasicBlock &BB : F.getBasicBlockList()) {
     for (auto &I : BB) {
-      DEBUG(errs() << "\n Checking for I " << I);
+      LLVM_DEBUG(errs() << "\n Checking for I " << I);
       if (std::find(QEDInsts.begin(), QEDInsts.end(), &I) != QEDInsts.end()) {
-        DEBUG(errs() << "\nQED Instruction ");
+        LLVM_DEBUG(errs() << "\nQED Instruction ");
         assert(QEDU::hasValidMetadata(&I) &&
                "QED Instruction should have valid QED Metadata");
         assert(QEDU::hasValidDL(&I) &&
                "QED Instruction should have QED debug location");
       } else {
-        DEBUG(errs() << "\n Normal Instruction");
+        LLVM_DEBUG(errs() << "\n Normal Instruction");
       }
     }
   }
