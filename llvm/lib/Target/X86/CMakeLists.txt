@@ -75,6 +75,8 @@ set(sources
   X86WinEHState.cpp
   X86InsertWait.cpp
   Eddiv.cpp
+  QEDUtils.cpp
+  QEDError.cpp
   )
 
 add_llvm_target(X86CodeGen ${sources})

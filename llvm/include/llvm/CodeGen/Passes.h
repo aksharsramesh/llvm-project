@@ -477,6 +477,14 @@ namespace llvm {
   /// Creates MIR Debugify pass. \see MachineDebugify.cpp
   ModulePass *createDebugifyMachineModulePass();
 
+  /// EDDI-V pass. \see llvm/lib/Target/X86/Eddiv.cpp
+  FunctionPass *createEddivPass();
+  extern char &EddivID;
+
+  ///QED Error Pass. \see llvm/lib/Target/X86/QEDError.cpp
+  FunctionPass *createQEDEPass();
+  extern char &QEDEID;
+
   /// Creates MIR Strip Debug pass. \see MachineStripDebug.cpp
   /// If OnlyDebugified is true then it will only strip debug info if it was
   /// added by a Debugify pass. The module will be left unchanged if the debug

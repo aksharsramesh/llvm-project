@@ -496,6 +496,7 @@ void X86PassConfig::addPostRegAlloc() {
     addPass(createX86LoadValueInjectionLoadHardeningPass());
   else
     addPass(createX86LoadValueInjectionLoadHardeningUnoptimizedPass());
+  addPass(createQEDEPass());
 }
 
 void X86PassConfig::addPreSched2() { addPass(createX86ExpandPseudoPass()); }

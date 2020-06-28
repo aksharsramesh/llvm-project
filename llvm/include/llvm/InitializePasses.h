@@ -439,6 +439,12 @@ void initializeWriteBitcodePassPass(PassRegistry&);
 void initializeWriteThinLTOBitcodePass(PassRegistry&);
 void initializeXRayInstrumentationPass(PassRegistry&);
 
+/// EDDI-V pass. see llvm/lib/Target/X86/Eddiv.cpp
+void initializeEddivPass(PassRegistry&);
+
+/// QED Error pass. see llvm/lib/Target/X86/QEDError.cpp
+void initializeQEDEPass(PassRegistry&);
+
 } // end namespace llvm
 
 #endif // LLVM_INITIALIZEPASSES_H
