@@ -68,7 +68,7 @@ void QEDU::addDebugLoc(Instruction *I) {
 
 /// added for QED add DebugLoc(99,99)
 void QEDU::addDebugLoc(MachineInstr *MI) {
-  const Function *TheFunction = MI->getParent()->getParent()->getFunction();
+  const Function *TheFunction = &(MI->getParent()->getParent()->getFunction());
   DebugLoc DL = DebugLoc::get(99, 99, TheFunction->getSubprogram());
   MI->setDebugLoc(DL);
 }
@@ -138,7 +138,7 @@ bool QEDU::hasNoQEDAttribute(Function *F){
 
 bool QEDU::hasNoQEDAttribute(MachineFunction *MF){
 
-  Function *F = const_cast<Function*>(MF->getFunction());
+  Function *F = const_cast<Function*>(&MF->getFunction());
   return hasNoQEDAttribute(F);
 
 }
