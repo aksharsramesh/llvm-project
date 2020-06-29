@@ -45,6 +45,8 @@ cl::opt<int> EddivDupCount("eddiv-dup-count",
                                     "duplicated for a given load in eddiv"),
                            cl::init(5));
 
+cl::opt<bool> Verify("verify", cl::desc("Verify the QED"), cl::init(false));
+
 class Eddiv : public FunctionPass {
 
 private:
