@@ -77,6 +77,7 @@ set(sources
   Eddiv.cpp
   QEDUtils.cpp
   QEDError.cpp
+  PLC.cpp
   )
 
 add_llvm_target(X86CodeGen ${sources})

@@ -410,6 +410,9 @@ void X86PassConfig::addIRPasses() {
   // EDDI-V Pass. \see llvm/lib/Target/X86/Eddiv.cpp
   addPass(createEddivPass());
 
+  // PLC Pass. see llvm/lib/Target/X86/PLC.cpp
+  addPass(createPLCPass());
+
   // Add Control Flow Guard checks.
   const Triple &TT = TM->getTargetTriple();
   if (TT.isOSWindows()) {

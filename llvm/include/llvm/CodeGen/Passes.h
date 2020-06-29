@@ -485,6 +485,10 @@ namespace llvm {
   FunctionPass *createQEDEPass();
   extern char &QEDEID;
 
+  // PLC Pass. \see llvm/lib/Target/X86/PLC.cpp
+  ModulePass *createPLCPass();
+  extern char &PLCID;
+
   /// Creates MIR Strip Debug pass. \see MachineStripDebug.cpp
   /// If OnlyDebugified is true then it will only strip debug info if it was
   /// added by a Debugify pass. The module will be left unchanged if the debug

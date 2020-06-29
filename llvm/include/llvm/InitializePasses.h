@@ -445,6 +445,9 @@ void initializeEddivPass(PassRegistry&);
 /// QED Error pass. see llvm/lib/Target/X86/QEDError.cpp
 void initializeQEDEPass(PassRegistry&);
 
+/// PLC pass. see llvm/lib/Target/X86/PLC.cpp
+void initializePLCPass(PassRegistry&);
+
 } // end namespace llvm
 
 #endif // LLVM_INITIALIZEPASSES_H
