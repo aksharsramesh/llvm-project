@@ -24,11 +24,12 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Module.h"
-#include "llvm/IR/TypeBuilder.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/InitializePasses.h"
+#include "llvm/IR/DerivedTypes.h"
 
 namespace llvm {
 
@@ -46,7 +47,7 @@ cl::opt<int> QedDepth(
     cl::desc("number of load instructions on which PLC needs to performed"),
     cl::init(5));
 
-cl::opt<bool> Verify("qed-verify", cl::desc("Verify the QED"), cl::init(false));
+// cl::opt<bool> Verify("qed-verify", cl::desc("Verify the QED"), cl::init(false));
 
 class PLC : public ModulePass {
 
@@ -64,7 +65,8 @@ class PLC : public ModulePass {
 
 
   /// Library function to compare the values of global variables.
-  Constant *globalFn;
+  // Constant *globalFn;
+  FunctionCallee globalFn;
 
   /// Function which is called by thread
   Function *ThreadFunction;

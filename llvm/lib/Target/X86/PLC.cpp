@@ -44,12 +44,13 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Module.h"
-#include "llvm/IR/TypeBuilder.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/CodeGen/MachinePassRegistry.h"
 #include "llvm/Support/Debug.h"
+#include "llvm/InitializePasses.h"
+#include "llvm/IR/DerivedTypes.h"
 
 using namespace llvm;
 
@@ -181,7 +182,8 @@ bool PLC::runOnModule(Module &M) {
 
 	LLVM_DEBUG(errs() << "\nPLC Pass for module :" << M.getName());
 
-	voidPtrTy = TypeBuilder<void *, false>::get(TheContext);
+	// voidPtrTy = TypeBuilder<void *, false>::get(TheContext);
+	voidPtrTy = PointerType::get(Type::getVoidTy(TheContext), 0); 
 
 	/// Add declarations for the required library functions.
 	declareFunctions(M);
