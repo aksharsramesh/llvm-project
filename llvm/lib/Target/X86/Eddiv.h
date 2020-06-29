@@ -26,6 +26,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/InitializePasses.h"
+#include "llvm/IR/DerivedTypes.h"
 
 namespace llvm {
 
@@ -54,7 +55,9 @@ private:
   BasicBlock *thenBB;
 
   /// Error function
-  Constant *errFn;
+
+  // Constant *errFn;
+  FunctionCallee errFn;
   Module *TheModule;
 
   GlobalVariable *GV;
