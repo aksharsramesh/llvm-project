@@ -49,6 +49,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/CodeGen/MachinePassRegistry.h"
+#include "llvm/Support/Debug.h"
 
 using namespace llvm;
 
@@ -97,8 +98,8 @@ void PLC::createCall(Value *Type, Value *Signature, Instruction *I,
 	QEDU::addMetaData(CI);
 	QEDU::addDebugLoc(CI);
 	QEDInsts.push_back(CI);
-	DEBUG(errs() << "\n Created call for the instruction " << *I);
-	DEBUG(errs() << "\n The call instruction is " << *CI);
+	LLVM_DEBUG(errs() << "\n Created call for the instruction " << *I);
+	LLVM_DEBUG(errs() << "\n The call instruction is " << *CI);
 	return;
 }
 
@@ -128,7 +129,7 @@ void PLC::createCallForType(Value *Signature, Instruction *I, Type *Ty,
 			break;
 
 		default:
-			DEBUG(errs() << "\n Type not handled" << *Ty);
+			LLVM_DEBUG(errs() << "\n Type not handled" << *Ty);
 			break;
 	}
 
@@ -137,12 +138,12 @@ void PLC::createCallForType(Value *Signature, Instruction *I, Type *Ty,
 
 /// \brief For two globals \param GV1, \param GV2, this functions performs PLC
 void PLC::processGlobal(GlobalVariable *GV1, GlobalVariable *GV2){
-  DEBUG(errs()<<"\n The first global is "<<*GV1);
-  DEBUG(errs()<<"\n Second global is "<<*GV2);
+  LLVM_DEBUG(errs()<<"\n The first global is "<<*GV1);
+  LLVM_DEBUG(errs()<<"\n Second global is "<<*GV2);
   BasicBlock *BB = &(ThreadFunction->getEntryBlock());
   Value *signature = getConstant(signatureMap[BB]);
   Instruction *I = &(BB->front());
-  DEBUG(errs()<<"\n The first instruction is "<<*I);
+  LLVM_DEBUG(errs()<<"\n The first instruction is "<<*I);
   createCallForType(signature, I, GV1->getType()->getElementType(), GV1, GV2);
 }
 
@@ -154,11 +155,11 @@ void PLC::handleCallInst(CallInst* CI){
     return;
   if(F->getName() != "pthread_create")
     return;
-  DEBUG(errs()<<"\n This is a call to pthread create"<<*CI);
+  LLVM_DEBUG(errs()<<"\n This is a call to pthread create"<<*CI);
   assert(CI->getNumArgOperands() == 4 && "Call to pthread create will have four operands");
   ThreadFunction = dyn_cast<Function>(CI->getArgOperand(2));
   assert(ThreadFunction && "Function can not be null");
-  DEBUG(errs()<<"\n The name of function is "<<F->getName());
+  LLVM_DEBUG(errs()<<"\n The name of function is "<<F->getName());
   for(auto pair : QEDU::GlobalsMap){
     processGlobal(pair.first, pair.second);
   }
@@ -171,14 +172,14 @@ bool PLC::runOnModule(Module &M) {
 		return false;
 
   if(QEDU::GlobalsMap.empty()){
-    DEBUG(errs()<<"\n NO PLC global variables found");
+    LLVM_DEBUG(errs()<<"\n NO PLC global variables found");
     return false;
   }
 
 	LLVMContext &TheContext = M.getContext();
 	TheModule = &M;
 
-	DEBUG(errs() << "\nPLC Pass for module :" << M.getName());
+	LLVM_DEBUG(errs() << "\nPLC Pass for module :" << M.getName());
 
 	voidPtrTy = TypeBuilder<void *, false>::get(TheContext);
 
