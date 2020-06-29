@@ -738,6 +738,10 @@ static uint64_t getAttrKindEncoding(Attribute::AttrKind Kind) {
   case Attribute::EmptyKey:
   case Attribute::TombstoneKey:
     llvm_unreachable("Trying to encode EmptyKey/TombstoneKey");
+
+  // For Heisen QED
+  case Attribute::NoQEDFunction:
+    return bitc::ATTR_KIND_NO_QED_FUNCTION;
   }
 
   llvm_unreachable("Trying to encode unknown attribute");

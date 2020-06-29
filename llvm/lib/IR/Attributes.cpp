@@ -323,6 +323,10 @@ std::pair<unsigned, Optional<unsigned>> Attribute::getAllocSizeArgs() const {
 std::string Attribute::getAsString(bool InAttrGrp) const {
   if (!pImpl) return {};
 
+  // For Heisen QED
+  if (hasAttribute(Attribute::NoQEDFunction))
+    return "noqedfunction";
+
   if (hasAttribute(Attribute::SanitizeAddress))
     return "sanitize_address";
   if (hasAttribute(Attribute::SanitizeHWAddress))

@@ -1585,6 +1585,8 @@ static bool isFuncOnlyAttr(Attribute::AttrKind Kind) {
   case Attribute::Speculatable:
   case Attribute::StrictFP:
   case Attribute::NullPointerIsValid:
+  // For Heisen QED
+  case Attribute::NoQEDFunction:
     return true;
   default:
     break;

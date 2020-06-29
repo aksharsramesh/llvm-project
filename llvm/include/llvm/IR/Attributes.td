@@ -109,6 +109,9 @@ def NoMerge : EnumAttr<"nomerge">;
 /// Pointer is known to be not null.
 def NonNull : EnumAttr<"nonnull">;
 
+/// Don't perform QED transforms.
+def NoQEDFunction : EnumAttr<"noqedfunction">;
+
 /// The function does not recurse.
 def NoRecurse : EnumAttr<"norecurse">;
 

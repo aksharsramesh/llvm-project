@@ -1288,6 +1288,8 @@ static uint64_t getRawAttributeMask(Attribute::AttrKind Val) {
     return 1ULL << 62;
   case Attribute::NoFree:
     return 1ULL << 63;
+  // For Heisen QED
+  case Attribute::NoQEDFunction:   return 1 << 17;
   default:
     // Other attributes are not supported in the raw format,
     // as we ran out of space.
@@ -1532,6 +1534,10 @@ static Attribute::AttrKind getAttrFromCode(uint64_t Code) {
     return Attribute::SanitizeMemTag;
   case bitc::ATTR_KIND_PREALLOCATED:
     return Attribute::Preallocated;
+  
+  // For Heisen QED
+  case bitc::ATTR_KIND_NO_QED_FUNCTION:
+    return Attribute::NoQEDFunction;
   }
 }
 
