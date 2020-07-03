@@ -1179,6 +1179,9 @@ def CTADMaybeUnsupported : DiagGroup<"ctad-maybe-unsupported">;
 
 def FortifySource : DiagGroup<"fortify-source">;
 
+// Warnings for #pragma clang transform
+def ClangTransform : DiagGroup<"pragma-transform">;
+
 def MaxTokens : DiagGroup<"max-tokens"> {
   code Documentation = [{
 The warning is issued if the number of pre-processor tokens exceeds
