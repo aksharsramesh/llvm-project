@@ -3414,6 +3414,11 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
        Args.hasFlag(options::OPT_fexperimental_transform_pragma,
        options::OPT_fno_experimental_transform_pragma, false);
 
+  // Enable or disable support fir #pragma clang qed
+  Opts.QEDPragma =
+       Args.hasFlag(options::OPT_fqed_pragma,
+       options::OPT_fno_qed_pragma, false);
+
   Opts.MatrixTypes = Args.hasArg(OPT_fenable_matrix);
 
   Opts.MaxTokens = getLastArgIntValue(Args, OPT_fmax_tokens_EQ, 0, Diags);

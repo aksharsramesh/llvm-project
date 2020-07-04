@@ -865,6 +865,11 @@ PRAGMA_ANNOTATION(pragma_openmp_end)
 PRAGMA_ANNOTATION(pragma_transform)
 PRAGMA_ANNOTATION(pragma_transform_end)
 
+// Annotation for qed pragmas
+// #pragma clang qed
+PRAGMA_ANNOTATION(pragma_qed)
+PRAGMA_ANNOTATION(pragma_qed_end)
+
 // Annotations for loop pragma directives #pragma clang loop ...
 // The lexer produces these so that they only take effect when the parser
 // handles #pragma loop ... directives.

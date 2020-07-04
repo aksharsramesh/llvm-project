@@ -276,6 +276,11 @@ struct PragmaTransformHandler : public PragmaHandler {
                     Token &FirstToken) override;
 };
 
+// For #pragma clang qed
+struct PragmaQEDHandler : public PragmaHandler {
+  PragmaQEDHandler() : PragmaHandler("qed") {}
+  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,			                         Token &FirstToken) override;
+};
 
 struct PragmaMaxTokensHereHandler : public PragmaHandler {
   PragmaMaxTokensHereHandler() : PragmaHandler("max_tokens_here") {}
@@ -422,6 +427,12 @@ void Parser::initializePragmaHandlers() {
       TransformHandler = std::make_unique<PragmaTransformHandler>();
       PP.AddPragmaHandler("clang", TransformHandler.get());
   }
+
+  if (getLangOpts().QEDPragma) {
+      QEDHandler = std::make_unique<PragmaQEDHandler>();
+      PP.AddPragmaHandler("clang", QEDHandler.get());
+  }
+
 }
 
 void Parser::resetPragmaHandlers() {
@@ -540,6 +551,12 @@ void Parser::resetPragmaHandlers() {
       PP.RemovePragmaHandler("clang", TransformHandler.get());
       TransformHandler.reset();
   }
+
+  if (getLangOpts().QEDPragma) {
+      PP.RemovePragmaHandler("clang", QEDHandler.get());
+      QEDHandler.reset();
+  }
+
 }
 
 /// Handle the annotation token produced for #pragma unused(...)
@@ -3262,6 +3279,61 @@ void PragmaTransformHandler::HandlePragma(Preprocessor &PP,
   // Handle in parser
   PP.EnterTokenStream(std::move(Toks), PragmaToks.size(),
         /*DisableMacroExpansion=*/false, /*IsReinject=*/false);
+}
+
+/// Handle
+///   #pragma clang qed ...
+void PragmaQEDHandler::HandlePragma(Preprocessor &PP,
+        PragmaIntroducer Introducer, Token &FirstTok) {
+  // "clang" token is not passed
+  // "qed" is FirstTok
+  // Everything up until tok::eod (or tok::eof) is wrapped between
+  // tok::annot_pragma_qed and tok::annot_pragma_qed_end, and
+  // pushed-back into the token stream. The tok::eod/eof is consumed as well:
+  //
+  // Token stream before:
+  // FirstTok:"qed" | <trans> [clauses..] eod   ...
+  // Token stream after :
+  //          "qed"   <trans> [clauses..] eod | ...
+  // After pushing the annotation tokens:
+  //
+  // | annot_pragma_qed <trans> [clauses..] annot_pragma_qed_end ...
+  //
+  // The symbol | is before the next token returned by PP.Lex()
+
+  SmallVector<Token, 16> PragmaToks;
+
+  Token StartTok;
+  StartTok.startToken();
+  StartTok.setKind(tok::annot_pragma_qed);
+  StartTok.setLocation(FirstTok.getLocation());
+  PragmaToks.push_back(StartTok);
+
+  SourceLocation EodLoc = FirstTok.getLocation();
+  while (true) {
+    Token Tok;
+    PP.Lex(Tok);
+    assert(!Tok.isAnnotation() && "It should not be possible to nest annotations");
+    if (Tok.is(tok::eod) || Tok.is(tok::eof)) {
+      EodLoc = Tok.getLocation();
+      break;
+    }
+    PragmaToks.push_back(Tok);
+  }
+
+  Token EndTok;
+  EndTok.startToken();
+  EndTok.setKind(tok::annot_pragma_qed_end);
+  EndTok.setLocation(EodLoc);
+  PragmaToks.push_back(EndTok);
+
+ // Copy tokens for the preprocessor to own and free.
+  auto Toks = std::make_unique<Token[]>(PragmaToks.size());
+  std::copy(PragmaToks.begin(), PragmaToks.end(), Toks.get());
+
+  // Handle in parser
+  PP.EnterTokenStream(std::move(Toks), PragmaToks.size(),
+         /*DisableMacroExpansion=*/false, /*IsReinject=*/false);
 }
 
 /// Handle the Microsoft \#pragma intrinsic extension.
