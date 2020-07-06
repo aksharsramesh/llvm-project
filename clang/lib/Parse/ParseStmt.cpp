@@ -14,7 +14,7 @@
 #include "clang/AST/PrettyDeclStackTrace.h"
 #include "clang/Basic/Attributes.h"
 #include "clang/Basic/PrettyStackTrace.h"
-#include "clang/Basic/Transform.h"
+#include "clang/Basic/QED.h"
 #include "clang/Parse/LoopHint.h"
 #include "clang/Parse/Parser.h"
 #include "clang/Parse/RAIIObjectsForParser.h"
@@ -408,9 +408,10 @@ Retry:
     ProhibitAttributes(Attrs);
     return ParsePragmaLoopHint(Stmts, StmtCtx, TrailingElseLoc, Attrs);
 
-  case tok::annot_pragma_transform:
+  // For #pragma clang qed
+  case tok::annot_pragma_qed:
     ProhibitAttributes(Attrs);
-    return ParsePragmaTransform(StmtCtx);
+    return ParsePragmaQED(StmtCtx);
 
   case tok::annot_pragma_dump:
     HandlePragmaDump();

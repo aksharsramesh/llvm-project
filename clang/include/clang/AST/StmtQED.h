@@ -10,43 +10,43 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_CLANG_AST_STMTTRANSFROM_H
-#define LLVM_CLANG_AST_STMTTRANSFROM_H
+#ifndef LLVM_CLANG_AST_STMTQED_H
+#define LLVM_CLANG_AST_STMTQED_H
 
 #include "clang/AST/Stmt.h"
-#include "clang/Basic/Transform.h"
+#include "clang/Basic/QED.h"
 #include "llvm/Support/raw_ostream.h"
 
 namespace clang {
 
-/// Represents a clause of a \p TransformExecutableDirective.
-class TransformClause {
+/// Represents a clause of a \p QEDExecutableDirective.
+class QEDClause {
 public:
   enum Kind {
     UnknownKind,
-#define TRANSFORM_CLAUSE(Keyword, Name) Name##Kind,
-#define TRANSFORM_CLAUSE_LAST(Keyword, Name) Name##Kind, LastKind = Name##Kind
-#include "clang/AST/TransformClauseKinds.def"
+#define QED_CLAUSE(Keyword, Name) Name##Kind,
+#define QED_CLAUSE_LAST(Keyword, Name) Name##Kind, LastKind = Name##Kind
+#include "clang/AST/QEDClauseKinds.def"
   };
 
-  static bool isValidForTransform(Transform::Kind TransformKind,
-                                  TransformClause::Kind ClauseKind);
-  static Kind getClauseKind(Transform::Kind TransformKind, llvm::StringRef Str);
-  static llvm::StringRef getClauseKeyword(TransformClause::Kind ClauseKind);
+  static bool isValidForQED(QED::Kind QEDKind,
+                                  QEDClause::Kind ClauseKind);
+  static Kind getClauseKind(QED::Kind QEDKind, llvm::StringRef Str);
+  static llvm::StringRef getClauseKeyword(QEDClause::Kind ClauseKind);
 
   // TODO: implement
 };
 
 /// Represents
 ///
-///   #pragma clang transform
+///   #pragma clang qed
 ///
 /// in the AST.
-class TransformExecutableDirective final {
+class QEDExecutableDirective final {
   // TODO: implement
 };
 
 const Stmt *getAssociatedLoop(const Stmt *S);
 } // namespace clang
 
-#endif /* LLVM_CLANG_AST_STMTTRANSFROM_H */
+#endif /* LLVM_CLANG_AST_STMTQED_H */

@@ -208,7 +208,6 @@ class Parser : public CodeCompletionHandler {
   std::unique_ptr<PragmaHandler> AttributePragmaHandler;
   std::unique_ptr<PragmaHandler> MaxTokensHerePragmaHandler;
   std::unique_ptr<PragmaHandler> MaxTokensTotalPragmaHandler;
-  std::unique_ptr<PragmaHandler> TransformHandler;
   std::unique_ptr<PragmaHandler> QEDHandler;
 
   std::unique_ptr<CommentHandler> CommentSemaHandler;
@@ -1730,16 +1729,17 @@ public:
     MaybeTypeCast,
     IsTypeCast
   };
-
-  using TransformClauseResult = ActionResult<TransformClause *>;
-  static TransformClauseResult ClauseError() {
-    return TransformClauseResult(true);
+  
+  // For #pragma clang qed
+  using QEDClauseResult = ActionResult<QEDClause *>;
+  static QEDClauseResult ClauseError() {
+    return QEDClauseResult(true);
   }
-  static TransformClauseResult ClauseError(const DiagnosticBuilder &) {
+  static QEDClauseResult ClauseError(const DiagnosticBuilder &) {
     return ClauseError();
   }
-  static TransformClauseResult ClauseEmpty() {
-    return TransformClauseResult(false);
+  static QEDClauseResult ClauseEmpty() {
+    return QEDClauseResult(false);
   }
 
   ExprResult ParseExpression(TypeCastState isTypeCast = NotTypeCast);
@@ -2098,12 +2098,13 @@ private:
                                  ParsedStmtContext StmtCtx,
                                  SourceLocation *TrailingElseLoc,
                                  ParsedAttributesWithRange &Attrs);
-
-  Transform::Kind
-  tryParsePragmaTransform(SourceLocation BeginLoc, ParsedStmtContext StmtCtx,
-                                         SmallVectorImpl<TransformClause *> &Clauses);
-  StmtResult ParsePragmaTransform(ParsedStmtContext StmtCtx);
-  TransformClauseResult ParseTransformClause(Transform::Kind TransformKind);
+  
+  // For #pragma clang qed
+  QED::Kind
+  tryParsePragmaQED(SourceLocation BeginLoc, ParsedStmtContext StmtCtx,
+		                         SmallVectorImpl<QEDClause *> &Clauses);
+  StmtResult ParsePragmaQED(ParsedStmtContext StmtCtx);
+  QEDClauseResult ParseQEDClause(QED::Kind QEDKind);
 
   /// Describes the behavior that should be taken for an __if_exists
   /// block.

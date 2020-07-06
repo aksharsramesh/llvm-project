@@ -45,6 +45,7 @@ add_clang_library(clangBasic
   Diagnostic.cpp
   DiagnosticIDs.cpp
   DiagnosticOptions.cpp
+  QED.cpp
   ExpressionTraits.cpp
   FileManager.cpp
   FileSystemStatCache.cpp
@@ -89,7 +90,6 @@ add_clang_library(clangBasic
   Targets/X86.cpp
   Targets/XCore.cpp
   TokenKinds.cpp
-  Transform.cpp
   TypeTraits.cpp
   Version.cpp
   Warnings.cpp

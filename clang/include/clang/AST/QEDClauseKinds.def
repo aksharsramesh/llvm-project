@@ -1,0 +1,15 @@
+#ifndef QED_CLAUSE
+#  define QED_CLAUSE(Keyword, Name)
+#endif
+#ifndef QED_CLAUSE_LAST
+#  define QED_CLAUSE_LAST(Keyword, Name)  QED_CLAUSE(Keyword, Name)
+#endif
+
+QED_CLAUSE(full,Full)
+QED_CLAUSE(partial,Partial)
+
+QED_CLAUSE(width,Width)
+QED_CLAUSE_LAST(factor,Factor)
+
+#undef QED_CLAUSE
+#undef QED_CLAUSE_LAST

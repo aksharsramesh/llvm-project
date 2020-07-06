@@ -1,4 +1,4 @@
-//===---- SemaTransform.h ------------------------------------- -*- C++ -*-===//
+//===---- SemaQED.h ------------------------------------- -*- C++ -*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,13 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// Semantic analysis for code transformations.
+// Semantic analysis for code QEDations.
 //
 //===----------------------------------------------------------------------===//
 
 #include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/AST/StmtTransform.h"
-#include "clang/Basic/Transform.h"
+#include "clang/AST/StmtQED.h"
+#include "clang/Basic/QED.h"
 #include "clang/Sema/Sema.h"
 #include "clang/Sema/SemaDiagnostic.h"
 #include "llvm/ADT/DenseMap.h"
@@ -21,29 +21,15 @@
 using namespace clang;
 
 StmtResult
-Sema::ActOnLoopTransformDirective(Transform::Kind Kind,
-                                  llvm::ArrayRef<TransformClause *> Clauses,
+Sema::ActOnLoopQEDDirective(QED::Kind Kind,
+                                  llvm::ArrayRef<QEDClause *> Clauses,
                                   Stmt *AStmt, SourceRange Loc) {
   // TOOD: implement
   return StmtError();
 }
-
-TransformClause *Sema::ActOnFullClause(SourceRange Loc) {
+/*
+QEDClause *Sema::ActOnFullClause(SourceRange Loc) {
   // TOOD: implement
   return nullptr;
 }
-
-TransformClause *Sema::ActOnPartialClause(SourceRange Loc, Expr *Factor) {
-  // TOOD: implement
-  return nullptr;
-}
-
-TransformClause *Sema::ActOnWidthClause(SourceRange Loc, Expr *Width) {
-  // TOOD: implement
-  return nullptr;
-}
-
-TransformClause *Sema::ActOnFactorClause(SourceRange Loc, Expr *Factor) {
-  // TOOD: implement
-  return nullptr;
-}
+*/

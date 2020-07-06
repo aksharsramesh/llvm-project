@@ -10,47 +10,41 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "clang/AST/StmtTransform.h"
+#include "clang/AST/StmtQED.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Stmt.h"
 #include "clang/AST/StmtOpenMP.h"
 
 using namespace clang;
 
-bool TransformClause::isValidForTransform(Transform::Kind TransformKind,
-                                          TransformClause::Kind ClauseKind) {
-  switch (TransformKind) {
-  case clang::Transform::LoopUnrollKind:
+bool QEDClause::isValidForQED(QED::Kind QEDKind,
+                                          QEDClause::Kind ClauseKind) {
+  switch (QEDKind) {
+  case clang::QED::EddivKind:
     return ClauseKind == PartialKind || ClauseKind == FullKind;
-  case clang::Transform::LoopUnrollAndJamKind:
-    return ClauseKind == PartialKind;
-  case clang::Transform::LoopVectorizationKind:
-    return ClauseKind == WidthKind;
-  case clang::Transform::LoopInterleavingKind:
-    return ClauseKind == FactorKind;
   default:
     return false;
   }
 }
 
-TransformClause::Kind
-TransformClause ::getClauseKind(Transform::Kind TransformKind,
+QEDClause::Kind
+QEDClause ::getClauseKind(QED::Kind QEDKind,
                                 llvm::StringRef Str) {
-#define TRANSFORM_CLAUSE(Keyword, Name)                                        \
-  if (isValidForTransform(TransformKind, TransformClause::Kind::Name##Kind) && \
+#define QED_CLAUSE(Keyword, Name)                                        \
+  if (isValidForQED(QEDKind, QEDClause::Kind::Name##Kind) && \
       Str == #Keyword)                                                         \
-    return TransformClause::Kind::Name##Kind;
-#include "clang/AST/TransformClauseKinds.def"
-  return TransformClause::UnknownKind;
+    return QEDClause::Kind::Name##Kind;
+#include "clang/AST/QEDClauseKinds.def"
+  return QEDClause::UnknownKind;
 }
 
 llvm::StringRef
-TransformClause ::getClauseKeyword(TransformClause::Kind ClauseKind) {
+QEDClause ::getClauseKeyword(QEDClause::Kind ClauseKind) {
   assert(ClauseKind > UnknownKind);
   assert(ClauseKind <= LastKind);
   static const char *ClauseKeyword[LastKind] = {
-#define TRANSFORM_CLAUSE(Keyword, Name) #Keyword,
-#include "clang/AST/TransformClauseKinds.def"
+#define QED_CLAUSE(Keyword, Name) #Keyword,
+#include "clang/AST/QEDClauseKinds.def"
 
   };
   return ClauseKeyword[ClauseKind - 1];

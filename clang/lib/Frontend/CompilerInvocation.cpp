@@ -3409,11 +3409,6 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
   Opts.BuildingPCHWithObjectFile = Args.hasArg(OPT_building_pch_with_obj);
   Opts.PCHInstantiateTemplates = Args.hasArg(OPT_fpch_instantiate_templates);
 
-  // Enable or disable support for #pragma clang transform.
-  Opts.ExperimentalTransformPragma =
-       Args.hasFlag(options::OPT_fexperimental_transform_pragma,
-       options::OPT_fno_experimental_transform_pragma, false);
-
   // Enable or disable support fir #pragma clang qed
   Opts.QEDPragma =
        Args.hasFlag(options::OPT_fqed_pragma,

@@ -1690,11 +1690,6 @@ def fno_openmp_optimistic_collapse : Flag<["-"], "fno-openmp-optimistic-collapse
 def static_openmp: Flag<["-"], "static-openmp">,
   HelpText<"Use the static host OpenMP runtime while linking.">;
 
-def fexperimental_transform_pragma : Flag<["-"], "fexperimental-transform-pragma">, Group<f_Group>,
-  Flags<[CC1Option, HelpHidden]>, HelpText<"Parse #pragma clang transform directives.">;
-def fno_experimental_transform_pragma : Flag<["-"], "fno-experimental-transform-pragma">, Group<f_Group>,
-  Flags<[CC1Option, HelpHidden]>, HelpText<"Disable #pragma clang transform directives.">;
-
 def fqed_pragma : Flag<["-"], "fqed-pragma">, Group<f_Group>,
   Flags<[CC1Option, HelpHidden]>, HelpText<"Parse #pragma clang qed directives.">;
 def fno_qed_pragma : Flag<["-"], "fno-qed-pragma">, Group<f_Group>,

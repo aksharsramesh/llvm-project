@@ -1179,8 +1179,8 @@ def CTADMaybeUnsupported : DiagGroup<"ctad-maybe-unsupported">;
 
 def FortifySource : DiagGroup<"fortify-source">;
 
-// Warnings for #pragma clang transform
-def ClangTransform : DiagGroup<"pragma-transform">;
+// Warnings for #pragma clang qed
+def ClangQED : DiagGroup<"pragma-qed">;
 
 def MaxTokens : DiagGroup<"max-tokens"> {
   code Documentation = [{

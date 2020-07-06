@@ -860,11 +860,6 @@ PRAGMA_ANNOTATION(pragma_opencl_extension)
 PRAGMA_ANNOTATION(pragma_openmp)
 PRAGMA_ANNOTATION(pragma_openmp_end)
 
-// Annotations for code transformation pragmas
-// #pragma clang transform ...
-PRAGMA_ANNOTATION(pragma_transform)
-PRAGMA_ANNOTATION(pragma_transform_end)
-
 // Annotation for qed pragmas
 // #pragma clang qed
 PRAGMA_ANNOTATION(pragma_qed)

@@ -1,0 +1,12 @@
+#ifndef QED_DIRECTIVE
+#  define QED_DIRECTIVE(Name)
+#endif
+#ifndef QED_DIRECTIVE_LAST
+#  define QED_DIRECTIVE_LAST(Name) QED_DIRECTIVE(Name)
+#endif
+
+// Optimizations accessible through "#pragma clang qed".
+QED_DIRECTIVE(Eddiv)
+
+#undef QED_DIRECTIVE
+#undef QED_DIRECTIVE_LAST

@@ -16,11 +16,11 @@ add_clang_library(clangParse
   ParseObjc.cpp
   ParseOpenMP.cpp
   ParsePragma.cpp
+  ParseQED.cpp
   ParseStmt.cpp
   ParseStmtAsm.cpp
   ParseTemplate.cpp
   ParseTentative.cpp
-  ParseTransform.cpp
   Parser.cpp
 
   LINK_LIBS

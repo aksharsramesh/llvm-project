@@ -247,8 +247,6 @@ LANGOPT(SYCLVersion       , 32, 0, "Version of the SYCL standard used")
 
 LANGOPT(HIPUseNewLaunchAPI, 1, 0, "Use new kernel launching API for HIP")
 
-LANGOPT(ExperimentalTransformPragma, 1, 0, "Enable #pragma clang transform")
-
 LANGOPT(QEDPragma, 1, 0, "Enable #pragma clang qed")
 
 LANGOPT(SizedDeallocation , 1, 0, "sized deallocation")

@@ -58,6 +58,7 @@ add_clang_library(clangSema
   SemaOpenMP.cpp
   SemaOverload.cpp
   SemaPseudoObject.cpp
+  SemaQED.cpp
   SemaStmt.cpp
   SemaStmtAsm.cpp
   SemaStmtAttr.cpp
@@ -67,7 +68,6 @@ add_clang_library(clangSema
   SemaTemplateInstantiate.cpp
   SemaTemplateInstantiateDecl.cpp
   SemaTemplateVariadic.cpp
-  SemaTransform.cpp
   SemaType.cpp
   TypeLocBuilder.cpp
 
