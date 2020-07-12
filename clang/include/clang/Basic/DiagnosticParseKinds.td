@@ -1347,6 +1347,10 @@ def err_pragma_qed_expected_directive : Error<
   "expected a transformation name">;
 def err_pragma_qed_unknown_directive : Error<
   "unknown transformation">;
+def err_pragma_qed_expected_clause : Error<
+  "expected a clause name">;
+def err_pragma_qed_unknown_clause : Error<
+  "unknown clause name">;
 
 def err_pragma_fp_invalid_option : Error<
   "%select{invalid|missing}0 option%select{ %1|}0; expected 'contract' or 'reassociate'">;

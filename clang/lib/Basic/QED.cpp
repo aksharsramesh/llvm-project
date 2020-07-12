@@ -28,7 +28,7 @@ llvm::StringRef QED ::getQEDDirectiveKeyword(Kind K) {
   case UnknownKind:
     break;
   case EddivKind:
-    return "unroll";
+    return "eddiv";
   }
   llvm_unreachable("Not a known transformation");
 }

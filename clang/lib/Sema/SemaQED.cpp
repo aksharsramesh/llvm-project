@@ -27,9 +27,13 @@ Sema::ActOnLoopQEDDirective(QED::Kind Kind,
   // TOOD: implement
   return StmtError();
 }
-/*
+
 QEDClause *Sema::ActOnFullClause(SourceRange Loc) {
   // TOOD: implement
   return nullptr;
 }
-*/
+
+QEDClause *Sema::ActOnFactorClause(SourceRange Loc, Expr *Factor) {
+  // TOOD: implement
+  return nullptr;
+}

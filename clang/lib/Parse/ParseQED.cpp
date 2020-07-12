@@ -1,4 +1,4 @@
-//===---- ParseTransform.h -------------------------------------*- C++ -*-===//
+//===---- ParseQED.h -------------------------------------*- C++ -*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -20,7 +20,7 @@ QED::Kind
 Parser::tryParsePragmaQED(SourceLocation BeginLoc,
                                 ParsedStmtContext StmtCtx,
                                 SmallVectorImpl<QEDClause *> &Clauses) {
-  // ... Tok=<transform> | <...> tok::annot_pragma_transform_end ...
+  // ... Tok=<QED> | <...> tok::annot_pragma_QED_end ...
   if (Tok.isNot(tok::identifier)) {
     Diag(Tok, diag::err_pragma_qed_expected_directive);
     return QED::UnknownKind;
@@ -37,7 +37,7 @@ Parser::tryParsePragmaQED(SourceLocation BeginLoc,
     Diag(Tok, diag::err_pragma_qed_unknown_directive);
     return QED::UnknownKind;
   }
-/*
+
   while (true) {
     QEDClauseResult Clause = ParseQEDClause(DirectiveKind);
     if (Clause.isInvalid())
@@ -47,15 +47,15 @@ Parser::tryParsePragmaQED(SourceLocation BeginLoc,
 
     Clauses.push_back(Clause.get());
   }
-*/
+
   assert(Tok.is(tok::annot_pragma_qed_end));
   return DirectiveKind;
 }
 
 StmtResult Parser::ParsePragmaQED(ParsedStmtContext StmtCtx) {
-  assert(Tok.is(tok::annot_pragma_qed) && "Not a transform directive!");
+  assert(Tok.is(tok::annot_pragma_qed) && "Not a QED directive!");
 
-  // ... Tok=annot_pragma_transform | <trans> <...> annot_pragma_transform_end
+  // ... Tok=annot_pragma_QED | <trans> <...> annot_pragma_QED_end
   // ...
   SourceLocation BeginLoc = ConsumeAnnotationToken();
 
@@ -78,13 +78,13 @@ StmtResult Parser::ParsePragmaQED(ParsedStmtContext StmtCtx) {
     return AssociatedStmt;
   if (!getAssociatedLoop(AssociatedStmt.get()))
     return StmtError(
-        Diag(PreStmtLoc, diag::err_pragma_qed_unknown_directive));
+        Diag(PreStmtLoc, diag::err_pragma_qed_expected_clause));
 
   return Actions.ActOnLoopQEDDirective(DirectiveKind, DirectiveClauses,
                                              AssociatedStmt.get(),
                                              {BeginLoc, EndLoc});
 }
-/*
+
 Parser::QEDClauseResult
 Parser::ParseQEDClause(QED::Kind QEDKind) {
   // No more clauses
@@ -108,7 +108,28 @@ Parser::ParseQEDClause(QED::Kind QEDKind) {
     return Actions.ActOnFullClause(SourceRange{StartLoc, StartLoc});
 
     // Clauses with integer argument.
+    case QEDClause::FactorKind: {
+    BalancedDelimiterTracker T(*this, tok::l_paren,
+                               tok::annot_pragma_qed_end);
+    if (T.expectAndConsume(diag::err_expected_lparen_after,
+                           ClauseKeyword.data()))
+      return ClauseError();
+
+    ExprResult Expr = ParseConstantExpression();
+    if (Expr.isInvalid())
+      return ClauseError();
+
+    if (T.consumeClose())
+      return ClauseError();
+    SourceLocation EndLoc = T.getCloseLocation();
+    SourceRange Range{StartLoc, EndLoc};
+    switch (Kind) {
+    case QEDClause::FactorKind:
+      return Actions.ActOnFactorClause(Range, Expr.get());
+    default:
+      llvm_unreachable("Unhandled clause");
+    }
+  }
   }
   llvm_unreachable("Unhandled clause");
 }
-*/

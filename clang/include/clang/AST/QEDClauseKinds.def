@@ -6,9 +6,6 @@
 #endif
 
 QED_CLAUSE(full,Full)
-QED_CLAUSE(partial,Partial)
-
-QED_CLAUSE(width,Width)
 QED_CLAUSE_LAST(factor,Factor)
 
 #undef QED_CLAUSE

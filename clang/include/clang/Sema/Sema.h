@@ -12461,6 +12461,7 @@ public:
     Stmt *AStmt, SourceRange Loc);
 
   QEDClause *ActOnFullClause(SourceRange Loc);
+  QEDClause *ActOnFactorClause(SourceRange Loc, Expr *Factor);
 
 
   /// Creates a DeviceDiagBuilder that emits the diagnostic if the current

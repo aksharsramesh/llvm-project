@@ -21,7 +21,7 @@ bool QEDClause::isValidForQED(QED::Kind QEDKind,
                                           QEDClause::Kind ClauseKind) {
   switch (QEDKind) {
   case clang::QED::EddivKind:
-    return ClauseKind == PartialKind || ClauseKind == FullKind;
+    return ClauseKind == FullKind;
   default:
     return false;
   }
