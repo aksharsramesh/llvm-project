@@ -1128,6 +1128,9 @@ private:
   /// Whether statistic collection is enabled.
   static bool StatisticsEnabled;
 
+  /// Whether this stmt is within QED region.
+  bool IsQEDStmt;
+
 protected:
   /// Construct an empty statement.
   explicit Stmt(StmtClass SC, EmptyShell) : Stmt(SC) {}
@@ -1140,12 +1143,24 @@ public:
   Stmt &operator=(Stmt &&) = delete;
 
   Stmt(StmtClass SC) {
-    static_assert(sizeof(*this) <= 8,
+    
+    // CTT modified : Changing this temporarily 
+    static_assert(sizeof(*this) <= 16,
                   "changing bitfields changed sizeof(Stmt)");
     static_assert(sizeof(*this) % alignof(void *) == 0,
                   "Insufficient alignment!");
     StmtBits.sClass = SC;
     if (StatisticsEnabled) Stmt::addStmtClass(SC);
+
+    IsQEDStmt = false;
+  }
+
+  bool isQEDStmt() const {
+    return IsQEDStmt;
+  }
+
+  void setIsQEDStmt() {
+    IsQEDStmt = true;
   }
 
   StmtClass getStmtClass() const {

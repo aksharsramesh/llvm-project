@@ -20,11 +20,13 @@ QED::Kind
 Parser::tryParsePragmaQED(SourceLocation BeginLoc,
                                 ParsedStmtContext StmtCtx,
                                 SmallVectorImpl<QEDClause *> &Clauses) {
-  // ... Tok=<QED> | <...> tok::annot_pragma_QED_end ...
-  if (Tok.isNot(tok::identifier)) {
+  llvm::errs() << "here\n";
+  if (Tok.isNot(tok::annot_pragma_qed_end)) {
     Diag(Tok, diag::err_pragma_qed_expected_directive);
     return QED::UnknownKind;
   }
+  // ... Tok=<QED> | <...> tok::annot_pragma_QED_end ...
+  /*
   std::string DirectiveStr = PP.getSpelling(Tok);
   QED::Kind DirectiveKind =
       QED::getQEDDirectiveKind(DirectiveStr);
@@ -49,7 +51,8 @@ Parser::tryParsePragmaQED(SourceLocation BeginLoc,
   }
 
   assert(Tok.is(tok::annot_pragma_qed_end));
-  return DirectiveKind;
+  */
+  return QED::EddivKind;
 }
 
 StmtResult Parser::ParsePragmaQED(ParsedStmtContext StmtCtx) {
@@ -74,6 +77,7 @@ StmtResult Parser::ParsePragmaQED(ParsedStmtContext StmtCtx) {
 
   SourceLocation PreStmtLoc = Tok.getLocation();
   StmtResult AssociatedStmt = ParseStatement();
+  /*
   if (AssociatedStmt.isInvalid())
     return AssociatedStmt;
   if (!getAssociatedLoop(AssociatedStmt.get()))
@@ -83,6 +87,9 @@ StmtResult Parser::ParsePragmaQED(ParsedStmtContext StmtCtx) {
   return Actions.ActOnLoopQEDDirective(DirectiveKind, DirectiveClauses,
                                              AssociatedStmt.get(),
                                              {BeginLoc, EndLoc});
+                                             */
+  AssociatedStmt.get()->setIsQEDStmt();
+  return AssociatedStmt;
 }
 
 Parser::QEDClauseResult

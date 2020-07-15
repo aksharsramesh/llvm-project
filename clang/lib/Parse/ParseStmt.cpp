@@ -410,6 +410,7 @@ Retry:
 
   // For #pragma clang qed
   case tok::annot_pragma_qed:
+    llvm::errs() << "my pragma \n";
     ProhibitAttributes(Attrs);
     return ParsePragmaQED(StmtCtx);
 

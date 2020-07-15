@@ -415,6 +415,12 @@ CodeGenFunction::EmitCompoundStmtWithoutScope(const CompoundStmt &S,
 
   Address RetAlloca = Address::invalid();
 
+  if (S.isQEDStmt()) {
+    llvm::errs() << "this is a qed stmt\n";
+  } else {
+    llvm::errs() << "this is a not qed stmt\n";
+  }
+
   for (auto *CurStmt : S.body()) {
     if (GetLast && ExprResult == CurStmt) {
       // We have to special case labels here.  They are statements, but when put

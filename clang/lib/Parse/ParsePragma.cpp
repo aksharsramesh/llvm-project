@@ -417,7 +417,7 @@ void Parser::initializePragmaHandlers() {
   MaxTokensTotalPragmaHandler = std::make_unique<PragmaMaxTokensTotalHandler>();
   PP.AddPragmaHandler("clang", MaxTokensTotalPragmaHandler.get());
 
-  if (getLangOpts().QEDPragma) {
+  if (getLangOpts().QEDPragma || true) {
       QEDHandler = std::make_unique<PragmaQEDHandler>();
       PP.AddPragmaHandler("clang", QEDHandler.get());
   }
@@ -3215,6 +3215,7 @@ void PragmaUnrollHintHandler::HandlePragma(Preprocessor &PP,
 ///   #pragma clang qed ...
 void PragmaQEDHandler::HandlePragma(Preprocessor &PP,
         PragmaIntroducer Introducer, Token &FirstTok) {
+  llvm::errs() << "here\n";
   // "clang" token is not passed
   // "qed" is FirstTok
   // Everything up until tok::eod (or tok::eof) is wrapped between
