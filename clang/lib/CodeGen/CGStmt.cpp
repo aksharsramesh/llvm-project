@@ -49,6 +49,9 @@ void CodeGenFunction::EmitStmt(const Stmt *S, ArrayRef<const Attr *> Attrs) {
   assert(S && "Null statement?");
   PGO.setCurrentStmt(S);
 
+  if(S->isQEDStmt())
+    addQEDMetadata(Builder.GetInsertBlock());
+
   // These statements have their own debug info handling.
   if (EmitSimpleStmt(S))
     return;
@@ -456,6 +459,9 @@ CodeGenFunction::EmitCompoundStmtWithoutScope(const CompoundStmt &S,
                          /*IsInit*/ false);
       }
     } else {
+      //if (S.isQEDStmt())
+	//if  (CurStmt == *S.body_begin() || CurStmt == *(S.body_end() - 1))
+          //CurStmt->setIsQEDStmt(); 
       EmitStmt(CurStmt);
     }
   }
@@ -504,6 +510,27 @@ void CodeGenFunction::EmitBlock(llvm::BasicBlock *BB, bool IsFinished) {
     CurFn->getBasicBlockList().push_back(BB);
   Builder.SetInsertPoint(BB);
 }
+
+void CodeGenFunction::addQEDMetadata(llvm::BasicBlock *block){
+  using namespace llvm;
+  std::string metadata_string;
+
+  BasicBlock::iterator it_start = block->getFirstInsertionPt();
+  Instruction *inst_start = &*it_start; 
+  Instruction *inst_final;
+
+  LLVMContext& C = inst_start->getContext();
+  metadata_string = "qed ";
+  MDNode* N = MDNode::get(C, MDString::get(C, metadata_string));
+  inst_start->setMetadata("begin", N);
+  
+  while (inst_start->getNextNode() != nullptr) {
+    inst_start = inst_start->getNextNode();
+  }
+
+  inst_final = inst_start;
+  inst_final->setMetadata("end", N);
+}	
 
 void CodeGenFunction::EmitBranch(llvm::BasicBlock *Target) {
   // Emit a branch from the current block to the target one if this
