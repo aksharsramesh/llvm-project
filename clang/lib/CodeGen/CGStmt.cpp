@@ -49,9 +49,6 @@ void CodeGenFunction::EmitStmt(const Stmt *S, ArrayRef<const Attr *> Attrs) {
   assert(S && "Null statement?");
   PGO.setCurrentStmt(S);
 
-  if(S->isQEDStmt())
-    addQEDMetadata(Builder.GetInsertBlock());
-
   // These statements have their own debug info handling.
   if (EmitSimpleStmt(S))
     return;
@@ -412,6 +409,7 @@ CodeGenFunction::EmitCompoundStmtWithoutScope(const CompoundStmt &S,
                                               bool GetLast,
                                               AggValueSlot AggSlot) {
 
+  llvm::BasicBlock* CompoundBlock = Builder.GetInsertBlock();
   const Stmt *ExprResult = S.getStmtExprResult();
   assert((!GetLast || (GetLast && ExprResult)) &&
          "If GetLast is true then the CompoundStmt must have a StmtExprResult");
@@ -459,12 +457,15 @@ CodeGenFunction::EmitCompoundStmtWithoutScope(const CompoundStmt &S,
                          /*IsInit*/ false);
       }
     } else {
-      //if (S.isQEDStmt())
-	//if  (CurStmt == *S.body_begin() || CurStmt == *(S.body_end() - 1))
-          //CurStmt->setIsQEDStmt(); 
       EmitStmt(CurStmt);
     }
+    if (S.isQEDStmt())
+      if (CurStmt == *S.body_begin())
+          addQEDMetadata(CompoundBlock, true);
   }
+
+  if (S.isQEDStmt())
+    addQEDMetadata(Builder.GetInsertBlock(), false);
 
   return RetAlloca;
 }
@@ -511,27 +512,21 @@ void CodeGenFunction::EmitBlock(llvm::BasicBlock *BB, bool IsFinished) {
   Builder.SetInsertPoint(BB);
 }
 
-void CodeGenFunction::addQEDMetadata(llvm::BasicBlock *block){
+void CodeGenFunction::addQEDMetadata(llvm::BasicBlock *block, bool begin){
   using namespace llvm;
   std::string metadata_string;
-
-  BasicBlock::iterator it_start = block->getFirstInsertionPt();
-  Instruction *inst_start = &*it_start; 
-  Instruction *inst_final;
-
-  LLVMContext& C = inst_start->getContext();
+  
+  Instruction* inst = &block->back(); 
+  LLVMContext& C = inst->getContext();
   metadata_string = "qed ";
   MDNode* N = MDNode::get(C, MDString::get(C, metadata_string));
-  inst_start->setMetadata("begin", N);
-  
-  while (inst_start->getNextNode() != nullptr) {
-    inst_start = inst_start->getNextNode();
+ 
+  if(begin){
+    inst->setMetadata("begin", N);
+    return;
   }
-
-  inst_final = inst_start;
-  inst_final->setMetadata("end", N);
-}	
-
+  inst->setMetadata("end", N);
+}
 void CodeGenFunction::EmitBranch(llvm::BasicBlock *Target) {
   // Emit a branch from the current block to the target one if this
   // was a real block.  If this was just a fall-through block after a

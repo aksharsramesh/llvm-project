@@ -2260,7 +2260,7 @@ public:
   /// code.
   void EmitBranch(llvm::BasicBlock *Block);
 
-  void addQEDMetadata(llvm::BasicBlock *block);
+  void addQEDMetadata(llvm::BasicBlock *block, bool begin);
 
   /// HaveInsertPoint - True if an insertion point is defined. If not, this
   /// indicates that the current code being emitted is unreachable.
