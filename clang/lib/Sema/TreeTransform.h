@@ -697,6 +697,7 @@ public:
   QualType TransformReferenceType(TypeLocBuilder &TLB, ReferenceTypeLoc TL);
 
   StmtResult TransformCompoundStmt(CompoundStmt *S, bool IsStmtExpr);
+  StmtResult TransformQEDStmt(QEDStmt *S, bool IsStmtExpr);
   ExprResult TransformCXXNamedCastExpr(CXXNamedCastExpr *E);
 
   TemplateParameterList *TransformTemplateParameterList(
@@ -7067,6 +7068,13 @@ TreeTransform<Derived>::TransformCompoundStmt(CompoundStmt *S) {
   return getDerived().TransformCompoundStmt(S, false);
 }
 
+
+template<typename Derived>
+StmtResult
+TreeTransform<Derived>::TransformQEDStmt(QEDStmt *S) {
+  return getDerived().TransformQEDStmt(S, false);
+}
+
 template<typename Derived>
 StmtResult
 TreeTransform<Derived>::TransformCompoundStmt(CompoundStmt *S,
@@ -7094,6 +7102,48 @@ TreeTransform<Derived>::TransformCompoundStmt(CompoundStmt *S,
 
     SubStmtChanged = SubStmtChanged || Result.get() != B;
     Statements.push_back(Result.getAs<Stmt>());
+  }
+
+  if (SubStmtInvalid)
+    return StmtError();
+
+  if (!getDerived().AlwaysRebuild() &&
+      !SubStmtChanged)
+    return S;
+
+  return getDerived().RebuildCompoundStmt(S->getLBracLoc(),
+                                          Statements,
+                                          S->getRBracLoc(),
+                                          IsStmtExpr);
+}
+
+template<typename Derived>
+StmtResult
+TreeTransform<Derived>::TransformQEDStmt(QEDStmt *S,
+		                              bool IsStmtExpr) {
+  Sema::CompoundScopeRAII CompoundScope(getSema());
+
+  const Stmt *ExprResult = S->getStmtExprResult();
+  bool SubStmtInvalid = false;
+  bool SubStmtChanged = false;
+  SmallVector<Stmt*, 8> Statements;
+  for (auto *B : S->body()) {
+     StmtResult Result = getDerived().TransformStmt(
+         B, IsStmtExpr && B == ExprResult ? SDK_StmtExprResult : SDK_Discarded);
+
+     if (Result.isInvalid()) {
+       // Immediately fail if this was a DeclStmt, since it's very
+       // likely that this will cause problems for future statements.
+       if (isa<DeclStmt>(B))
+         return StmtError();
+
+       // Otherwise, just keep processing substatements and fail later.
+       SubStmtInvalid = true;
+       continue;
+     }
+
+     SubStmtChanged = SubStmtChanged || Result.get() != B;
+     Statements.push_back(Result.getAs<Stmt>());
   }
 
   if (SubStmtInvalid)

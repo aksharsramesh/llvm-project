@@ -242,6 +242,10 @@ void StmtProfiler::VisitCompoundStmt(const CompoundStmt *S) {
   VisitStmt(S);
 }
 
+void StmtProfiler::VisitQEDStmt(const QEDStmt *S) {
+  VisitStmt(S);
+}
+
 void StmtProfiler::VisitCaseStmt(const CaseStmt *S) {
   VisitStmt(S);
 }

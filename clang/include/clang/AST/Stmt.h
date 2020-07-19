@@ -133,6 +133,18 @@ protected:
     SourceLocation LBraceLoc;
   };
 
+  class QEDStmtBitfields {
+    friend class ASTStmtReader;
+    friend class QEDStmt;
+
+    unsigned : NumStmtBits;
+
+    unsigned NumStmts : 32 - NumStmtBits;
+
+    /// The location of the opening "{".
+    SourceLocation LBraceLoc;
+  };
+
   class LabelStmtBitfields {
     friend class LabelStmt;
 
@@ -1001,6 +1013,7 @@ protected:
     StmtBitfields StmtBits;
     NullStmtBitfields NullStmtBits;
     CompoundStmtBitfields CompoundStmtBits;
+    QEDStmtBitfields QEDStmtBits;
     LabelStmtBitfields LabelStmtBits;
     AttributedStmtBitfields AttributedStmtBits;
     IfStmtBitfields IfStmtBits;
@@ -1143,10 +1156,9 @@ public:
   Stmt &operator=(Stmt &&) = delete;
 
   Stmt(StmtClass SC) {
-    
     // CTT modified : Changing this temporarily 
     static_assert(sizeof(*this) <= 16,
-                  "changing bitfields changed sizeof(Stmt)");
+		  "changing bitfields changed sizeof(Stmt)");
     static_assert(sizeof(*this) % alignof(void *) == 0,
                   "Insufficient alignment!");
     StmtBits.sClass = SC;
@@ -1493,6 +1505,129 @@ public:
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == CompoundStmtClass;
+  }
+
+  // Iterators
+  child_range children() { return child_range(body_begin(), body_end()); }
+
+  const_child_range children() const {
+    return const_child_range(body_begin(), body_end());
+  }
+};
+
+/// QEDStmt - This represents a group of statements like { stmt stmt }.
+class QEDStmt final : public Stmt,
+                           private llvm::TrailingObjects<QEDStmt, Stmt *> {
+  friend class ASTStmtReader;
+  friend TrailingObjects;
+
+  /// The location of the closing "}". LBraceLoc is stored in QEDStmtBits.
+  SourceLocation RBraceLoc;
+
+  QEDStmt(ArrayRef<Stmt *> Stmts, SourceLocation LB, SourceLocation RB);
+  explicit QEDStmt(EmptyShell Empty) : Stmt(QEDStmtClass, Empty) {}
+
+  void setStmts(ArrayRef<Stmt *> Stmts);
+
+public:
+  static QEDStmt *Create(const ASTContext &C, ArrayRef<Stmt *> Stmts,
+                              SourceLocation LB, SourceLocation RB);
+
+  // Build an empty compound statement with a location.
+  explicit QEDStmt(SourceLocation Loc)
+      : Stmt(QEDStmtClass), RBraceLoc(Loc) {
+    QEDStmtBits.NumStmts = 0;
+    QEDStmtBits.LBraceLoc = Loc;
+  }
+
+  // Build an empty compound statement.
+  static QEDStmt *CreateEmpty(const ASTContext &C, unsigned NumStmts);
+
+  bool body_empty() const { return QEDStmtBits.NumStmts == 0; }
+  unsigned size() const { return QEDStmtBits.NumStmts; }
+
+  using body_iterator = Stmt **;
+  using body_range = llvm::iterator_range<body_iterator>;
+
+  body_range body() { return body_range(body_begin(), body_end()); }
+  body_iterator body_begin() { return getTrailingObjects<Stmt *>(); }
+  body_iterator body_end() { return body_begin() + size(); }
+  Stmt *body_front() { return !body_empty() ? body_begin()[0] : nullptr; }
+
+  Stmt *body_back() {
+    return !body_empty() ? body_begin()[size() - 1] : nullptr;
+  }
+
+  using const_body_iterator = Stmt *const *;
+  using body_const_range = llvm::iterator_range<const_body_iterator>;
+
+  body_const_range body() const {
+    return body_const_range(body_begin(), body_end());
+  }
+
+  const_body_iterator body_begin() const {
+    return getTrailingObjects<Stmt *>();
+  }
+
+  const_body_iterator body_end() const { return body_begin() + size(); }
+
+  const Stmt *body_front() const {
+    return !body_empty() ? body_begin()[0] : nullptr;
+  }
+
+  const Stmt *body_back() const {
+    return !body_empty() ? body_begin()[size() - 1] : nullptr;
+  }
+
+  using reverse_body_iterator = std::reverse_iterator<body_iterator>;
+
+  reverse_body_iterator body_rbegin() {
+    return reverse_body_iterator(body_end());
+  }
+
+  reverse_body_iterator body_rend() {
+    return reverse_body_iterator(body_begin());
+  }
+
+  using const_reverse_body_iterator =
+      std::reverse_iterator<const_body_iterator>;
+
+  const_reverse_body_iterator body_rbegin() const {
+    return const_reverse_body_iterator(body_end());
+  }
+
+  const_reverse_body_iterator body_rend() const {
+    return const_reverse_body_iterator(body_begin());
+  }
+
+  // Get the Stmt that StmtExpr would consider to be the result of this
+  // compound statement. This is used by StmtExpr to properly emulate the GCC
+  // compound expression extension, which ignores trailing NullStmts when
+  // getting the result of the expression.
+  // i.e. ({ 5;;; })
+  //           ^^ ignored
+  // If we don't find something that isn't a NullStmt, just return the last
+  // Stmt.
+  Stmt *getStmtExprResult() {
+    for (auto *B : llvm::reverse(body())) {
+      if (!isa<NullStmt>(B))
+        return B;
+    }
+    return body_back();
+  }
+
+  const Stmt *getStmtExprResult() const {
+    return const_cast<QEDStmt *>(this)->getStmtExprResult();
+  }
+
+  SourceLocation getBeginLoc() const { return QEDStmtBits.LBraceLoc; }
+  SourceLocation getEndLoc() const { return RBraceLoc; }
+
+  SourceLocation getLBracLoc() const { return QEDStmtBits.LBraceLoc; }
+  SourceLocation getRBracLoc() const { return RBraceLoc; }
+
+  static bool classof(const Stmt *T) {
+    return T->getStmtClass() == QEDStmtClass;
   }
 
   // Iterators

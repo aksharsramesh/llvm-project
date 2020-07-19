@@ -119,6 +119,7 @@ namespace {
     }
 
     void PrintRawCompoundStmt(CompoundStmt *S);
+    void PrintRawQEDStmt(QEDStmt *S);
     void PrintRawDecl(Decl *D);
     void PrintRawDeclStmt(const DeclStmt *S);
     void PrintRawIfStmt(IfStmt *If);
@@ -180,6 +181,14 @@ void StmtPrinter::PrintRawCompoundStmt(CompoundStmt *Node) {
   Indent() << "}";
 }
 
+void StmtPrinter::PrintRawQEDStmt(QEDStmt *Node) {
+  OS << "{" << NL;
+  for (auto *I : Node->body())
+    PrintStmt(I);
+
+  Indent() << "}";
+}
+
 void StmtPrinter::PrintRawDecl(Decl *D) {
   D->print(OS, Policy, IndentLevel);
 }
@@ -202,6 +211,12 @@ void StmtPrinter::VisitDeclStmt(DeclStmt *Node) {
 void StmtPrinter::VisitCompoundStmt(CompoundStmt *Node) {
   Indent();
   PrintRawCompoundStmt(Node);
+  OS << "" << NL;
+}
+
+void StmtPrinter::VisitQEDStmt(QEDStmt *Node) {
+  Indent();
+  PrintRawQEDStmt(Node);
   OS << "" << NL;
 }
 

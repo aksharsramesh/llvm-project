@@ -1513,6 +1513,9 @@ public:
       /// A CompoundStmt record.
       STMT_COMPOUND,
 
+      /// A QEDStmt record.
+      STMT_QED,
+
       /// A CaseStmt record.
       STMT_CASE,
 

@@ -331,6 +331,37 @@ CompoundStmt *CompoundStmt::CreateEmpty(const ASTContext &C,
   return New;
 }
 
+QEDStmt::QEDStmt(ArrayRef<Stmt *> Stmts, SourceLocation LB,
+                           SourceLocation RB)
+    : Stmt(QEDStmtClass), RBraceLoc(RB) {
+  QEDStmtBits.NumStmts = Stmts.size();
+  setStmts(Stmts);
+  QEDStmtBits.LBraceLoc = LB;
+}
+
+void QEDStmt::setStmts(ArrayRef<Stmt *> Stmts) {
+  assert(QEDStmtBits.NumStmts == Stmts.size() &&
+         "NumStmts doesn't fit in bits of QEDStmtBits.NumStmts!");
+
+  std::copy(Stmts.begin(), Stmts.end(), body_begin());
+}
+
+QEDStmt *QEDStmt::Create(const ASTContext &C, ArrayRef<Stmt *> Stmts,
+                                  SourceLocation LB, SourceLocation RB) {
+  void *Mem =
+      C.Allocate(totalSizeToAlloc<Stmt *>(Stmts.size()), alignof(QEDStmt));
+  return new (Mem) QEDStmt(Stmts, LB, RB);
+}
+
+QEDStmt *QEDStmt::CreateEmpty(const ASTContext &C,
+                                       unsigned NumStmts) {
+  void *Mem =
+      C.Allocate(totalSizeToAlloc<Stmt *>(NumStmts), alignof(QEDStmt));
+  QEDStmt *New = new (Mem) QEDStmt(EmptyShell());
+  New->QEDStmtBits.NumStmts = NumStmts;
+  return New;
+}
+
 const Expr *ValueStmt::getExprStmt() const {
   const Stmt *S = this;
   do {

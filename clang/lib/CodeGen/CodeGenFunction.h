@@ -3023,6 +3023,10 @@ public:
                                        bool GetLast = false,
                                        AggValueSlot AVS =
                                                 AggValueSlot::ignored());
+  Address EmitQEDStmt(const QEDStmt &S,
+		      bool GetLast = false,
+		      AggValueSlot AVS =
+		               AggValueSlot::ignored());
 
   /// EmitLabel - Emit the block for the given label. It is legal to call this
   /// function even if there is no current insertion point.

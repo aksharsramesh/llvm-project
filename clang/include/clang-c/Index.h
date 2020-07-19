@@ -2570,6 +2570,10 @@ enum CXCursorKind {
 
   CXCursor_LastStmt = CXCursor_OMPScanDirective,
 
+  /** #pragma clang qed
+   */
+  CXCursor_QEDStmt = 288,
+
   /**
    * Cursor that represents the translation unit itself.
    *

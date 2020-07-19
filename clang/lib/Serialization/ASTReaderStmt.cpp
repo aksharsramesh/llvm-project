@@ -160,6 +160,18 @@ void ASTStmtReader::VisitCompoundStmt(CompoundStmt *S) {
   S->RBraceLoc = readSourceLocation();
 }
 
+
+void ASTStmtReader::VisitQEDStmt(QEDStmt *S) {
+  VisitStmt(S);
+  SmallVector<Stmt *, 16> Stmts;
+  unsigned NumStmts = Record.readInt();
+  while (NumStmts--)
+    Stmts.push_back(Record.readSubStmt());
+  S->setStmts(Stmts);
+  S->QEDStmtBits.LBraceLoc = readSourceLocation();
+  S->RBraceLoc = readSourceLocation();
+}
+
 void ASTStmtReader::VisitSwitchCase(SwitchCase *S) {
   VisitStmt(S);
   Record.recordSwitchCaseID(S, Record.readInt());
@@ -2784,6 +2796,11 @@ Stmt *ASTReader::ReadStmtFromStream(ModuleFile &F) {
 
     case STMT_COMPOUND:
       S = CompoundStmt::CreateEmpty(
+          Context, /*NumStmts=*/Record[ASTStmtReader::NumStmtFields]);
+      break;
+
+    case STMT_QED:
+      S = QEDStmt::CreateEmpty(
           Context, /*NumStmts=*/Record[ASTStmtReader::NumStmtFields]);
       break;
 

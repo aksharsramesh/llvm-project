@@ -88,6 +88,17 @@ void ASTStmtWriter::VisitCompoundStmt(CompoundStmt *S) {
   Code = serialization::STMT_COMPOUND;
 }
 
+void ASTStmtWriter::VisitQEDStmt(QEDStmt *S) {
+  VisitStmt(S);
+  Record.push_back(S->size());
+  for (auto *CS : S->body())
+    Record.AddStmt(CS);
+  Record.AddSourceLocation(S->getLBracLoc());
+  Record.AddSourceLocation(S->getRBracLoc());
+  Code = serialization::STMT_QED;
+}
+
+
 void ASTStmtWriter::VisitSwitchCase(SwitchCase *S) {
   VisitStmt(S);
   Record.push_back(Writer.getSwitchCaseID(S));
