@@ -464,12 +464,19 @@ CodeGenFunction::EmitQEDStmt(const QEDStmt &S,
                              bool GetLast,
                              AggValueSlot AggSlot) {
 
-  llvm::BasicBlock* CompoundBlock = Builder.GetInsertBlock();
   const Stmt *ExprResult = S.getStmtExprResult();
   assert((!GetLast || (GetLast && ExprResult)) &&
          "If GetLast is true then the CompoundStmt must have a StmtExprResult");
 
   Address RetAlloca = Address::invalid();
+
+  llvm::BasicBlock *PragmaQEDBlock = createBasicBlock("pragma.qed");
+
+  EmitBranch(PragmaQEDBlock);
+
+  EmitBlock(PragmaQEDBlock);
+
+  llvm::BasicBlock* CurBB = Builder.GetInsertBlock();
 
   for (auto *CurStmt : S.body()) {
     if (GetLast && ExprResult == CurStmt) {
@@ -508,11 +515,22 @@ CodeGenFunction::EmitQEDStmt(const QEDStmt &S,
     } else {
       EmitStmt(CurStmt);
     }
-      if (CurStmt == *S.body_begin())
-          addQEDMetadata(CompoundBlock, true);
+
+    if (CurStmt == *S.body_begin())
+      addQEDMetadata(CurBB, true);
   }
 
   addQEDMetadata(Builder.GetInsertBlock(), false);
+
+  llvm::BasicBlock *PostPragmaQEDBlock = createBasicBlock("post.qed");
+
+  EmitBranch(PostPragmaQEDBlock);
+
+  // addQEDMetadata(Builder.GetInsertBlock(), false);
+
+  EmitBlock(PostPragmaQEDBlock);
+
+  //addQEDMetadata(Builder.GetInsertBlock(), false);
 
   return RetAlloca;
 }
