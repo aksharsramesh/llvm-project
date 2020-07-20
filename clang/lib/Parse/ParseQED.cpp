@@ -76,7 +76,8 @@ StmtResult Parser::ParsePragmaQED(ParsedStmtContext StmtCtx) {
   SourceLocation EndLoc = ConsumeAnnotationToken();
 
   SourceLocation PreStmtLoc = Tok.getLocation();
-  StmtResult AssociatedStmt = ParseStatement();
+  StmtResult AssociatedStmt = ParseQEDStatement();
+  llvm::errs()<<"in ParsePragmaQED\n";
   /*
   if (AssociatedStmt.isInvalid())
     return AssociatedStmt;

@@ -4268,6 +4268,8 @@ public:
   void ActOnFinishOfCompoundStmt();
   StmtResult ActOnCompoundStmt(SourceLocation L, SourceLocation R,
                                ArrayRef<Stmt *> Elts, bool isStmtExpr);
+  StmtResult ActOnQEDStmt(SourceLocation L, SourceLocation R,
+                               ArrayRef<Stmt *> Elts, bool isStmtExpr);
 
   /// A RAII object to enter scope of a compound statement.
   class CompoundScopeRAII {

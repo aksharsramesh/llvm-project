@@ -375,7 +375,7 @@ bool CodeGenFunction::EmitSimpleStmt(const Stmt *S) {
   switch (S->getStmtClass()) {
   default: return false;
   case Stmt::NullStmtClass: break;
-  case Stmt::QEDStmtClass: EmitQEDStmt(cast<QEDStmt>(*S)); break;
+  case Stmt::QEDStmtClass: llvm::errs()<<"QED\n"; EmitQEDStmt(cast<QEDStmt>(*S)); break;
   case Stmt::CompoundStmtClass: EmitCompoundStmt(cast<CompoundStmt>(*S)); break;
   case Stmt::DeclStmtClass:     EmitDeclStmt(cast<DeclStmt>(*S));         break;
   case Stmt::LabelStmtClass:    EmitLabelStmt(cast<LabelStmt>(*S));       break;

@@ -129,6 +129,9 @@ public:
     /// This is a compound statement scope.
     CompoundStmtScope = 0x400000,
 
+    /// This is a QED statement scope,
+    QEDStmtScope = 0x400000,
+
     /// We are between inheritance colon and the real class/struct definition scope.
     ClassInheritanceScope = 0x800000,
 

@@ -433,6 +433,46 @@ StmtResult Sema::ActOnCompoundStmt(SourceLocation L, SourceLocation R,
   return CompoundStmt::Create(Context, Elts, L, R);
 }
 
+StmtResult Sema::ActOnQEDStmt(SourceLocation L, SourceLocation R,
+                                   ArrayRef<Stmt *> Elts, bool isStmtExpr) {
+  const unsigned NumElts = Elts.size();
+
+  // Mark the current function as usng floating point constrained intrinsics
+  if (getCurFPFeatures().isFPConstrained())
+    if (FunctionDecl *F = dyn_cast<FunctionDecl>(CurContext))
+      F->setUsesFPIntrin(true);
+
+  // If we're in C89 mode, check that we don't have any decls after stmts.  If
+  // so, emit an extension diagnostic.
+  if (!getLangOpts().C99 && !getLangOpts().CPlusPlus) {
+    // Note that __extension__ can be around a decl.
+    unsigned i = 0;
+    // Skip over all declarations.
+    for (; i != NumElts && isa<DeclStmt>(Elts[i]); ++i)
+      /*empty*/;
+
+    // We found the end of the list or a statement.  Scan for another declstmt.
+    for (; i != NumElts && !isa<DeclStmt>(Elts[i]); ++i)
+      /*empty*/;
+
+    if (i != NumElts) {
+      Decl *D = *cast<DeclStmt>(Elts[i])->decl_begin();
+      Diag(D->getLocation(), diag::ext_mixed_decls_code);
+    }
+  }
+
+  // Check for suspicious empty body (null statement) in `for' and `while'
+  // statements.  Don't do anything for template instantiations, this just adds
+  // noise.
+  if (NumElts != 0 && !CurrentInstantiationScope &&
+      getCurCompoundScope().HasEmptyLoopBodies) {
+    for (unsigned i = 0; i != NumElts - 1; ++i)
+      DiagnoseEmptyLoopBody(Elts[i], Elts[i + 1]);
+  }
+
+  return QEDStmt::Create(Context, Elts, L, R);
+}
+
 ExprResult
 Sema::ActOnCaseExpr(SourceLocation CaseLoc, ExprResult Val) {
   if (!Val.get())

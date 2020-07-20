@@ -876,6 +876,12 @@ StmtResult Parser::ParseCompoundStatement(bool isStmtExpr) {
                                 Scope::DeclScope | Scope::CompoundStmtScope);
 }
 
+StmtResult Parser::ParseQEDStatement(bool isStmtExpr) {
+	llvm::errs()<<"QED Correct\n";
+  return ParseQEDStatement(isStmtExpr,
+                                Scope::DeclScope | Scope::QEDStmtScope);
+}
+
 /// ParseCompoundStatement - Parse a "{}" block.
 ///
 ///       compound-statement: [C99 6.8.2]
@@ -908,6 +914,18 @@ StmtResult Parser::ParseCompoundStatement(bool isStmtExpr,
 
   // Parse the statements in the body.
   return ParseCompoundStatementBody(isStmtExpr);
+}
+
+StmtResult Parser::ParseQEDStatement(bool isStmtExpr,
+		                          unsigned ScopeFlags) {
+  assert(Tok.is(tok::l_brace) && "Not a compount stmt!");
+
+  // Enter a scope to hold everything within the compound stmt.  Compound
+  // statements can always hold declarations.
+  ParseScope CompoundScope(this, ScopeFlags);
+
+  // Parse the statements in the body.
+  return ParseQEDStatementBody(isStmtExpr);
 }
 
 /// Parse any pragmas at the start of the compound expression. We handle these
@@ -1151,7 +1169,133 @@ StmtResult Parser::ParseCompoundStatementBody(bool isStmtExpr) {
                                    Stmts, isStmtExpr);
 }
 
-/// ParseParenExprOrCondition:
+StmtResult Parser::ParseQEDStatementBody(bool isStmtExpr) {
+  PrettyStackTraceLoc CrashInfo(PP.getSourceManager(),
+                                Tok.getLocation(),
+                                "in compound statement ('{}')");
+
+  // Record the state of the FPFeatures, restore on leaving the
+  // compound statement.
+  Sema::FPFeaturesStateRAII SaveFPContractState(Actions);
+
+  InMessageExpressionRAIIObject InMessage(*this, false);
+  BalancedDelimiterTracker T(*this, tok::l_brace);
+  if (T.consumeOpen())
+    return StmtError();
+
+  Sema::CompoundScopeRAII CompoundScope(Actions, isStmtExpr);
+
+  // Parse any pragmas at the beginning of the compound statement.
+  ParseCompoundStatementLeadingPragmas();
+
+  StmtVector Stmts;
+
+  // "__label__ X, Y, Z;" is the GNU "Local Label" extension.  These are
+  // only allowed at the start of a compound stmt regardless of the language.
+
+  while (Tok.is(tok::kw___label__)) {
+    SourceLocation LabelLoc = ConsumeToken();
+
+    SmallVector<Decl *, 8> DeclsInGroup;
+    while (1) {
+      if (Tok.isNot(tok::identifier)) {
+        Diag(Tok, diag::err_expected) << tok::identifier;
+        break;
+      }
+
+      IdentifierInfo *II = Tok.getIdentifierInfo();
+      SourceLocation IdLoc = ConsumeToken();
+      DeclsInGroup.push_back(Actions.LookupOrCreateLabel(II, IdLoc, LabelLoc));
+
+      if (!TryConsumeToken(tok::comma))
+        break;
+    }
+
+    DeclSpec DS(AttrFactory);
+    DeclGroupPtrTy Res =
+        Actions.FinalizeDeclaratorGroup(getCurScope(), DS, DeclsInGroup);
+    StmtResult R = Actions.ActOnDeclStmt(Res, LabelLoc, Tok.getLocation());
+
+    ExpectAndConsumeSemi(diag::err_expected_semi_declaration);
+    if (R.isUsable())
+      Stmts.push_back(R.get());
+  }
+
+  ParsedStmtContext SubStmtCtx =
+     ParsedStmtContext::Compound |
+     (isStmtExpr ? ParsedStmtContext::InStmtExpr : ParsedStmtContext());
+
+  while (!tryParseMisplacedModuleImport() && Tok.isNot(tok::r_brace) &&
+		  Tok.isNot(tok::eof)) {
+    if (Tok.is(tok::annot_pragma_unused)) {
+      HandlePragmaUnused();
+      continue;
+    }
+
+    if (ConsumeNullStmt(Stmts))
+      continue;
+
+    StmtResult R;
+    if (Tok.isNot(tok::kw___extension__)) {
+      R = ParseStatementOrDeclaration(Stmts, SubStmtCtx);
+    } else {
+      // __extension__ can start declarations and it can also be a unary
+      // operator for expressions.  Consume multiple __extension__ markers here
+      // until we can determine which is which.
+      // FIXME: This loses extension expressions in the AST!
+      SourceLocation ExtLoc = ConsumeToken();
+      while (Tok.is(tok::kw___extension__))
+        ConsumeToken();
+
+      ParsedAttributesWithRange attrs(AttrFactory);
+      MaybeParseCXX11Attributes(attrs, nullptr,
+                               /*MightBeObjCMessageSend*/ true);
+
+      // If this is the start of a declaration, parse it as such.
+      if (isDeclarationStatement()) {
+        // __extension__ silences extension warnings in the subdeclaration.
+        // FIXME: Save the __extension__ on the decl as a node somehow?
+        ExtensionRAIIObject O(Diags);
+
+        SourceLocation DeclStart = Tok.getLocation(), DeclEnd;
+        DeclGroupPtrTy Res =
+	    ParseDeclaration(DeclaratorContext::BlockContext, DeclEnd, attrs);
+	R = Actions.ActOnDeclStmt(Res, DeclStart, DeclEnd);
+      } else {
+	// Otherwise this was a unary __extension__ marker.
+	ExprResult Res(ParseExpressionWithLeadingExtension(ExtLoc));
+	
+	if (Res.isInvalid()) {
+	  SkipUntil(tok::semi);
+	  continue;
+	}
+ 	
+	// Eat the semicolon at the end of stmt and convert the expr into a
+	// statement.
+	ExpectAndConsumeSemi(diag::err_expected_semi_after_expr);
+        R = handleExprStmt(Res, SubStmtCtx);
+        if (R.isUsable())
+          R = Actions.ProcessStmtAttributes(R.get(), attrs, attrs.Range);
+      }
+    }
+
+    if (R.isUsable())
+      Stmts.push_back(R.get());
+  }
+
+  SourceLocation CloseLoc = Tok.getLocation();
+
+  // We broke out of the while loop because we found a '}' or EOF
+  if (!T.consumeClose())
+    // Recover by creating a compound statement with what we parsed so far,
+    // instead of dropping everything and returning StmtError();
+    CloseLoc = T.getCloseLocation();
+
+  return Actions.ActOnQEDStmt(T.getOpenLocation(), CloseLoc,
+                                     Stmts, isStmtExpr);
+}
+
+//ParseParenExprOrCondition:
 /// [C  ]     '(' expression ')'
 /// [C++]     '(' condition ')'
 /// [C++1z]   '(' init-statement[opt] condition ')'
