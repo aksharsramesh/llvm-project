@@ -20,7 +20,6 @@ QED::Kind
 Parser::tryParsePragmaQED(SourceLocation BeginLoc,
                                 ParsedStmtContext StmtCtx,
                                 SmallVectorImpl<QEDClause *> &Clauses) {
-  llvm::errs() << "here\n";
   if (Tok.isNot(tok::annot_pragma_qed_end)) {
     Diag(Tok, diag::err_pragma_qed_expected_directive);
     return QED::UnknownKind;
@@ -77,7 +76,6 @@ StmtResult Parser::ParsePragmaQED(ParsedStmtContext StmtCtx) {
 
   SourceLocation PreStmtLoc = Tok.getLocation();
   StmtResult AssociatedStmt = ParseQEDStatement();
-  llvm::errs()<<"in ParsePragmaQED\n";
   /*
   if (AssociatedStmt.isInvalid())
     return AssociatedStmt;
@@ -89,7 +87,6 @@ StmtResult Parser::ParsePragmaQED(ParsedStmtContext StmtCtx) {
                                              AssociatedStmt.get(),
                                              {BeginLoc, EndLoc});
                                              */
-  AssociatedStmt.get()->setIsQEDStmt();
   return AssociatedStmt;
 }
 

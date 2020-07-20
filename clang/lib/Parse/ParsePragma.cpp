@@ -3215,7 +3215,6 @@ void PragmaUnrollHintHandler::HandlePragma(Preprocessor &PP,
 ///   #pragma clang qed ...
 void PragmaQEDHandler::HandlePragma(Preprocessor &PP,
         PragmaIntroducer Introducer, Token &FirstTok) {
-  llvm::errs() << "here\n";
   // "clang" token is not passed
   // "qed" is FirstTok
   // Everything up until tok::eod (or tok::eof) is wrapped between

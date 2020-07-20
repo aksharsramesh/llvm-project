@@ -1141,9 +1141,6 @@ private:
   /// Whether statistic collection is enabled.
   static bool StatisticsEnabled;
 
-  /// Whether this stmt is within QED region.
-  bool IsQEDStmt;
-
 protected:
   /// Construct an empty statement.
   explicit Stmt(StmtClass SC, EmptyShell) : Stmt(SC) {}
@@ -1164,15 +1161,6 @@ public:
     StmtBits.sClass = SC;
     if (StatisticsEnabled) Stmt::addStmtClass(SC);
 
-    IsQEDStmt = false;
-  }
-
-  bool isQEDStmt() const {
-    return IsQEDStmt;
-  }
-
-  void setIsQEDStmt() {
-    IsQEDStmt = true;
   }
 
   StmtClass getStmtClass() const {

@@ -410,7 +410,6 @@ Retry:
 
   // For #pragma clang qed
   case tok::annot_pragma_qed:
-    llvm::errs() << "my pragma \n";
     ProhibitAttributes(Attrs);
     return ParsePragmaQED(StmtCtx);
 
@@ -877,7 +876,6 @@ StmtResult Parser::ParseCompoundStatement(bool isStmtExpr) {
 }
 
 StmtResult Parser::ParseQEDStatement(bool isStmtExpr) {
-	llvm::errs()<<"QED Correct\n";
   return ParseQEDStatement(isStmtExpr,
                                 Scope::DeclScope | Scope::QEDStmtScope);
 }

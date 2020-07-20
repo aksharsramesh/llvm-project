@@ -375,7 +375,7 @@ bool CodeGenFunction::EmitSimpleStmt(const Stmt *S) {
   switch (S->getStmtClass()) {
   default: return false;
   case Stmt::NullStmtClass: break;
-  case Stmt::QEDStmtClass: llvm::errs()<<"QED\n"; EmitQEDStmt(cast<QEDStmt>(*S)); break;
+  case Stmt::QEDStmtClass: EmitQEDStmt(cast<QEDStmt>(*S)); break;
   case Stmt::CompoundStmtClass: EmitCompoundStmt(cast<CompoundStmt>(*S)); break;
   case Stmt::DeclStmtClass:     EmitDeclStmt(cast<DeclStmt>(*S));         break;
   case Stmt::LabelStmtClass:    EmitLabelStmt(cast<LabelStmt>(*S));       break;
@@ -471,12 +471,6 @@ CodeGenFunction::EmitQEDStmt(const QEDStmt &S,
 
   Address RetAlloca = Address::invalid();
 
-  if (S.isQEDStmt()) {
-    llvm::errs() << "this is a qed stmt\n";
-  } else {
-    llvm::errs() << "this is a not qed stmt\n";
-  }
-
   for (auto *CurStmt : S.body()) {
     if (GetLast && ExprResult == CurStmt) {
       // We have to special case labels here.  They are statements, but when put
@@ -514,13 +508,11 @@ CodeGenFunction::EmitQEDStmt(const QEDStmt &S,
     } else {
       EmitStmt(CurStmt);
     }
-    if (S.isQEDStmt())
       if (CurStmt == *S.body_begin())
           addQEDMetadata(CompoundBlock, true);
   }
 
-  if (S.isQEDStmt())
-    addQEDMetadata(Builder.GetInsertBlock(), false);
+  addQEDMetadata(Builder.GetInsertBlock(), false);
 
   return RetAlloca;
 }
