@@ -513,13 +513,13 @@ CodeGenFunction::EmitQEDStmt(const QEDStmt &S,
     }
   }
 
-  addQEDMetadata(PragmaQEDBlock, true);
-
   auto BeforePostPragmaBB = Builder.GetInsertBlock();  
 
   llvm::BasicBlock *PostPragmaQEDBlock = createBasicBlock("post.qed");
 
   EmitBlock(PostPragmaQEDBlock);
+  
+  addQEDMetadata(PragmaQEDBlock, true);
 
   addQEDMetadata(BeforePostPragmaBB, false);
 
