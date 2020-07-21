@@ -472,11 +472,7 @@ CodeGenFunction::EmitQEDStmt(const QEDStmt &S,
 
   llvm::BasicBlock *PragmaQEDBlock = createBasicBlock("pragma.qed");
 
-  EmitBranch(PragmaQEDBlock);
-
   EmitBlock(PragmaQEDBlock);
-
-  llvm::BasicBlock* CurBB = Builder.GetInsertBlock();
 
   for (auto *CurStmt : S.body()) {
     if (GetLast && ExprResult == CurStmt) {
@@ -515,22 +511,17 @@ CodeGenFunction::EmitQEDStmt(const QEDStmt &S,
     } else {
       EmitStmt(CurStmt);
     }
-
-    if (CurStmt == *S.body_begin())
-      addQEDMetadata(CurBB, true);
   }
 
-  addQEDMetadata(Builder.GetInsertBlock(), false);
+  addQEDMetadata(PragmaQEDBlock, true);
+
+  auto BeforePostPragmaBB = Builder.GetInsertBlock();  
 
   llvm::BasicBlock *PostPragmaQEDBlock = createBasicBlock("post.qed");
 
-  EmitBranch(PostPragmaQEDBlock);
-
-  // addQEDMetadata(Builder.GetInsertBlock(), false);
-
   EmitBlock(PostPragmaQEDBlock);
 
-  //addQEDMetadata(Builder.GetInsertBlock(), false);
+  addQEDMetadata(BeforePostPragmaBB, false);
 
   return RetAlloca;
 }
