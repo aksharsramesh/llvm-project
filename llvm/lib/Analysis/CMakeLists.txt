@@ -96,6 +96,7 @@ add_llvm_component_library(LLVMAnalysis
   PostDominators.cpp
   ProfileSummaryInfo.cpp
   PtrUseVisitor.cpp
+  QEDMetadataAnalysis.cpp
   RegionInfo.cpp
   RegionPass.cpp
   RegionPrinter.cpp

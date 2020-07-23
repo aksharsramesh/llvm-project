@@ -352,6 +352,7 @@ void initializeProcessImplicitDefsPass(PassRegistry&);
 void initializeProfileSummaryInfoWrapperPassPass(PassRegistry&);
 void initializePromoteLegacyPassPass(PassRegistry&);
 void initializePruneEHPass(PassRegistry&);
+void initializeQEDMetadataAnalysisPassPass(PassRegistry&);
 void initializeRABasicPass(PassRegistry&);
 void initializeRAGreedyPass(PassRegistry&);
 void initializeReachingDefAnalysisPass(PassRegistry&);

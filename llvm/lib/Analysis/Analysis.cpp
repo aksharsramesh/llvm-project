@@ -70,6 +70,7 @@ void llvm::initializeAnalysis(PassRegistry &Registry) {
   initializeOptimizationRemarkEmitterWrapperPassPass(Registry);
   initializePhiValuesWrapperPassPass(Registry);
   initializePostDominatorTreeWrapperPassPass(Registry);
+  initializeQEDMetadataAnalysisPassPass(Registry);
   initializeRegionInfoPassPass(Registry);
   initializeRegionViewerPass(Registry);
   initializeRegionPrinterPass(Registry);
